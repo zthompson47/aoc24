@@ -17,17 +17,6 @@ fn part1() -> usize {
                 maze.guard.position.row = row_index;
             }
             maze.rows.push(line);
-
-            /*
-            for (column_index, position) in line.iter().enumerate() {
-                if let Some(p) = maze.columns.get_mut(column_index) {
-                    p.push(*position);
-                } else {
-                    maze.columns.insert(column_index, vec![*position]);
-                }
-            }
-            */
-
             maze
         })
         .run()
@@ -36,7 +25,6 @@ fn part1() -> usize {
 #[derive(Default, Debug)]
 struct Maze {
     rows: Vec<Vec<Object>>,
-    //columns: Vec<Vec<Object>>,
     guard: Guard,
 }
 
