@@ -45,30 +45,50 @@ fn part2() -> usize {
                 .map(|x| x.parse::<u128>().unwrap())
                 .collect::<Vec<_>>();
 
-            for operators in Operators::new(
+            use rayon::prelude::*;
+            let operator_combinations = Operators::new(
                 operands.len() - 1,
                 vec![Operator::Add, Operator::Multiply, Operator::Concatenate],
-            ) {
-                let result = operators.iter().zip(operands[1..].iter()).fold(
-                    operands[0],
-                    |acc, (operator, operand)| match operator {
-                        Operator::Add => acc + operand,
-                        Operator::Multiply => acc * operand,
-                        Operator::Concatenate => {
-                            let mut number = acc.to_string();
-                            number.push_str(operand.to_string().as_str());
-                            number.parse::<u128>().unwrap()
-                        }
-                    },
-                );
-                if result == target {
+            )
+            .collect::<Vec<_>>();
+            if let Some(operators) = operator_combinations
+                .par_iter()
+                .find_first(|operators| apply_operators(&operands, operators) == target)
+            {
+                if apply_operators(&operands.clone(), operators) == target {
                     return target as usize;
                 }
             }
 
+            /*
+            for operators in Operators::new(
+                operands.len() - 1,
+                vec![Operator::Add, Operator::Multiply, Operator::Concatenate],
+            ) {
+                if apply_operators(&operands, &operators) == target {
+                    return target as usize;
+                }
+            }
+            */
+
             0
         })
         .sum()
+}
+
+fn apply_operators(operands: &[u128], operators: &[Operator]) -> u128 {
+    operators
+        .iter()
+        .zip(operands[1..].iter())
+        .fold(operands[0], |acc, (operator, operand)| match operator {
+            Operator::Add => acc + operand,
+            Operator::Multiply => acc * operand,
+            Operator::Concatenate => {
+                let mut number = acc.to_string();
+                number.push_str(operand.to_string().as_str());
+                number.parse::<u128>().unwrap()
+            }
+        })
 }
 
 #[derive(Debug, Clone, Copy)]
