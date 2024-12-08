@@ -16,15 +16,7 @@ fn part1() -> usize {
             for operators in
                 Operators::new(operands.len() - 1, vec![Operator::Add, Operator::Multiply])
             {
-                let result = operators.iter().zip(operands[1..].iter()).fold(
-                    operands[0],
-                    |acc, (operator, operand)| match operator {
-                        Operator::Add => acc + operand,
-                        Operator::Multiply => acc * operand,
-                        _ => unreachable!(),
-                    },
-                );
-                if result == target {
+                if apply_operators(&operands, &operators) == target {
                     return target as usize;
                 }
             }
