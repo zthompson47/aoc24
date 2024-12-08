@@ -114,6 +114,8 @@ impl Iterator for Operators {
             return None;
         }
 
+        // Convert current count into "number" with radix of number of operators
+        // and each operator as a digit.
         let mut result = vec![self.operators[0]; self.len];
         let mut count = self.count;
         let mut i = 0;
