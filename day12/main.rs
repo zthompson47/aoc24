@@ -61,8 +61,6 @@ fn run() -> (usize, usize) {
             acc
         },
     );
-    println!("{garden:#?}");
-    println!("{groups:?}");
 
     let part1 = groups
         .values()
@@ -77,7 +75,6 @@ fn run() -> (usize, usize) {
 }
 
 fn corners(row: usize, column: usize, garden: &[Vec<Plot>]) -> usize {
-    println!("__________{row},{column}");
     let plot = garden[row][column];
     let north = if row > 0 {
         garden[row - 1][column].label == plot.label
@@ -119,7 +116,6 @@ fn corners(row: usize, column: usize, garden: &[Vec<Plot>]) -> usize {
     } else {
         false
     };
-    println!("**{north},{northeast},{east},{southeast},{south},{southwest},{west},{northwest}**");
     [
         (west, northwest, north),
         (north, northeast, east),
@@ -127,17 +123,13 @@ fn corners(row: usize, column: usize, garden: &[Vec<Plot>]) -> usize {
         (south, southwest, west),
     ]
     .iter()
-    .map(|corners| {
-        let r = match corners {
-            (true, true, false)
-            | (false, true, true)
-            | (false, false, true)
-            | (true, false, false)
-            | (true, true, true) => 0,
-            _ => 1,
-        };
-        println!("+++ {r} +++");
-        r
+    .map(|corners| match corners {
+        (true, true, false)
+        | (false, true, true)
+        | (false, false, true)
+        | (true, false, false)
+        | (true, true, true) => 0,
+        _ => 1,
     })
     .sum()
 }
