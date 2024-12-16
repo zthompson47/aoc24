@@ -1,13 +1,14 @@
+#![allow(dead_code, clippy::needless_range_loop)]
+
 fn main() {
-    //println!("Part 1: {}", part1());
+    println!("Part 1: {}", part1());
     println!("Part 2: {}", part2());
 }
 
-//const X: usize = 11;
-//const Y: usize = 7;
 const X: usize = 101;
 const Y: usize = 103;
 const T: isize = 100;
+const SYMMETRY_THRESHOLD: f32 = 92.0;
 
 type Map = Vec<Vec<i32>>;
 
@@ -19,10 +20,6 @@ fn part1() -> usize {
         r.make_moves(&map, T);
         map[r.position.0 as usize][r.position.1 as usize] += 1;
     }
-
-    println!("{robots:?}");
-
-    print_map(&robots, &map);
 
     let (mut q1, mut q2, mut q3, mut q4) = (0, 0, 0, 0);
     let x_mid = map.len() / 2;
@@ -39,10 +36,7 @@ fn part1() -> usize {
                 q4 += map[x][y];
             }
         }
-        println!();
     }
-
-    println!("q1:{q1} q2:{q2} q3:{q3} q4:{q4}");
 
     (q1 * q2 * q3 * q4).try_into().unwrap()
 }
@@ -52,41 +46,15 @@ fn part2() -> usize {
     let mut robots = input();
 
     for i in 1..10000 {
-        //println!("{robots:?}");
         let mut map = vec![vec![0; Y]; X];
         for r in robots.iter_mut() {
             r.make_moves(&map, 1);
             map[r.position.0 as usize][r.position.1 as usize] += 1;
         }
-        if vertical_symmetry(&map) > 92.0 {
-            println!("{}", vertical_symmetry(&map));
-            print_map(&robots, &map);
-            println!();
+        if vertical_symmetry(&map) > SYMMETRY_THRESHOLD {
             result = i;
             break;
         }
-
-        // Top left blank..
-        /*
-        let mut got_one = true;
-        'out: for x in 0..10 {
-            for y in 0..10 {
-                if map[x][y] != 0 {
-                    got_one = false;
-                    break 'out;
-                }
-            }
-        }
-        if got_one {
-            print_map(&robots, &map);
-            println!();
-        }
-        */
-
-        //println!("{robots:?}");
-        //print_map(&robots, &map);
-        //println!();
-        //println!("{}", percent_blank(&map));
     }
 
     result
@@ -114,7 +82,7 @@ fn percent_blank(map: &Map) -> f32 {
         / (map.len() as f32 * map[0].len() as f32)
 }
 
-fn print_map(robots: &[Robot], map: &Map) {
+fn print_map(map: &Map) {
     for y in 0..Y {
         for x in 0..X {
             match map[x][y] {
