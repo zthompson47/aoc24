@@ -15,24 +15,14 @@ fn part1() -> usize {
 
 fn part2() -> usize {
     let (mut map, moves, mut robot) = input();
-    //print_map(&map);
-    //println!("{moves:?}");
-    //println!();
     map = double_wide(&map);
     robot = (robot.0, robot.1 * 2);
-    //print_map(&map);
-    //println!();
     for direction in moves {
-        //println!("direction={direction:?} robot: {robot:?}");
         if let Some(moved_to) = make_move(&mut map, robot, direction) {
-            //println!("!!!!!!!!!!!GOTIT!!!!!! {moved_to:?}");
             robot = moved_to;
-            //print_map(&map);
-            //println!();
         }
     }
-    print_map(&map);
-    //println!();
+    //print_map(&map);
     score(&map)
 }
 
