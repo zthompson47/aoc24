@@ -9,7 +9,7 @@ fn main() {
 }
 
 fn input() -> Vec<Vec<Cell>> {
-    let input = include_str!("test0.txt");
+    let input = include_str!("input.txt");
     //println!("{input}");
     input.lines().fold(Vec::new(), |mut acc, line| {
         acc.push(line.chars().map(Cell::from).collect::<Vec<_>>());
@@ -23,17 +23,6 @@ fn solve_maze() -> (usize, usize) {
     let start_position = Position::new(maze.len() - 2, 1);
     let start_direction = Direction::E;
     solver.solve(start_position, start_direction)
-
-    //print_maze(&maze);
-    /*
-    let mut visited = HashSet::new();
-    solve_maze(
-        Position::new(maze.len() - 2, 1),
-        Direction::E,
-        &maze,
-        &mut visited,
-    )
-    */
 }
 
 #[derive(Default)]
@@ -56,7 +45,6 @@ impl<'a> Solver<'a> {
     fn solve(mut self, start_position: Position, start_direction: Direction) -> (usize, usize) {
         self.follow_path(start_position, start_direction, 0, HashSet::new());
         self.solutions.sort();
-        //println!("{:?}", self.solutions);
         (self.solutions[0], self.lowest_solution_tiles.len())
     }
 
@@ -76,7 +64,6 @@ impl<'a> Solver<'a> {
             position,
             direction,
         }) {
-            //println!("  visited: {position:?} {direction:?} {score}");
             if *self
                 .visited
                 .get(&PosDir {
@@ -97,7 +84,6 @@ impl<'a> Solver<'a> {
                 );
             }
         } else {
-            //println!("folow_path: {position:?} {direction:?} {score}");
             self.visited.insert(
                 PosDir {
                     position,
@@ -109,19 +95,12 @@ impl<'a> Solver<'a> {
 
         match Path::new(position, direction, self.maze) {
             Path::Corners(corners) => {
-                //println!(" Corners: {corners:?}");
                 for corner in corners {
-                    println!("\nCORNER: {corner:?}");
                     for direction in corner.directions {
                         // Store each tile visited.
-                        println!("\n_ {:?} {:?} {:?}", position, corner.position, direction);
                         for tile in position.tile_span(corner.position) {
-                            println!("--- in til span {tile:?}");
                             visited_tiles.insert(tile);
                         }
-                        println!("************************");
-                        println!("{visited_tiles:?}");
-                        println!("************************");
 
                         let running_score =
                             score + 1000 + position.distance_from(corner.position) + 1;
@@ -156,7 +135,6 @@ impl<'a> Solver<'a> {
                         self.solution = Some(final_score);
                     }
                 }
-                //println!("___SOLUTION___ {final_score}");
                 self.solutions.push(final_score);
             }
         }
@@ -215,15 +193,6 @@ struct PosDir {
     direction: Direction,
 }
 
-/*
-#[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
-struct PosDirScore {
-    position: Position,
-    direction: Direction,
-    score: usize,
-}
-*/
-
 impl Position {
     fn new(row: usize, column: usize) -> Self {
         Position { row, column }
@@ -256,49 +225,6 @@ impl From<(usize, usize)> for Position {
         Position { row, column }
     }
 }
-
-/*
-fn solve_maze(
-    start: Position,
-    direction: Direction,
-    maze: &[Vec<Cell>],
-    visited: &mut HashSet<PosDir>,
-) -> usize {
-    println!("solve maze {start:?} {direction:?}");
-    if visited
-        .get(&PosDir {
-            position: start,
-            direction,
-        })
-        .is_some()
-    {
-        return 0;
-    } else {
-        visited.insert(PosDir {
-            position: start,
-            direction,
-        });
-    }
-    match Path::new(start, direction, maze) {
-        Path::DeadEnd => 0,
-        Path::Solution(position) => {
-            println!("___________SOLVED!!!!!!!!!!!!!!!_____________");
-            position.row.abs_diff(start.row) + position.column.abs_diff(start.column)
-        }
-        Path::Corners(corners) => {
-            let mut scores = HashSet::new();
-            for corner in corners {
-                for direction in corner.directions {
-                    scores.insert(solve_maze(corner.position, direction, maze, visited));
-                }
-            }
-            //let score = scores.take(&1).unwrap();
-            //1000 + score
-            1000
-        }
-    }
-}
-*/
 
 #[derive(Debug)]
 enum Path {
@@ -380,22 +306,6 @@ impl Corner {
         }
     }
 }
-
-/*
-fn print_maze(maze: &[Vec<Cell>]) {
-    for row in maze {
-        println!("{row:?}");
-    }
-}
-*/
-
-/*
-#[derive(Debug, Copy, Clone)]
-struct Reindeer {
-    direction: Direction,
-    position: (usize, usize),
-}
-*/
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 enum Direction {
