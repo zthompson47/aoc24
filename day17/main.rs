@@ -2,36 +2,44 @@ use std::{ops::BitXor, str::Lines};
 
 fn main() {
     let mut computer = Computer::from(include_str!("input.txt"));
-    //computer.a = 528;
-    //computer.a = 37222273957364;
-    // 0 => 1
-    // 1 => 0
-    // 2 => 1
-    // 3 => 3
-    // 4 => 5
-    // 5 => 4
-    // 6 => 7
-    // 7 => 6
-    //println!("{computer:?}");
+    //computer.a = 4333;
     println!("Part 1: {}", computer.run());
 
     let mut a = 0;
     for level in 1..=16 {
-        //println!("level:{level}");
+        //println!("Level {level}");
         a *= 8;
         loop {
-            //println!("  a:{a}");
             computer.reset(a);
             computer.run();
-            //println!("  out:{:?}", computer.out);
+            //println!("  a:{a} {:?}", computer.out);
             if computer.code[16 - level..] == computer.out {
-                //println!("  FOUND a:{a}");
+                //println!("  GOT IT {a}");
                 break;
             }
             a += 1;
         }
     }
     println!("Part 2: {a}");
+
+    /*
+    let start = 8u64.pow(6);
+    let end = 8u64.pow(7);
+    println!("[{start}, {end}]");
+    for a in start..end {
+        computer.reset(a);
+        computer.run();
+        //println!("??? {computer:?}");
+        //println!("{:?}", computer.out);
+        if computer.b != 0 {
+            println!("-- {a} b:{} c:{}", computer.b, computer.c);
+        }
+        if computer.out == [4, 5, 5, 0, 3, 3, 0] {
+            println!("-- got {a} b:{} c:{}", computer.b, computer.c);
+        }
+    }
+    println!("-- END {} b:{} c:{}", computer.a, computer.b, computer.c);
+    */
 
     //let mut i = 35184372088832;
 
@@ -79,20 +87,7 @@ fn main() {
     }
     //println!("{i}");
     */
-
-        /*
-    let mut computer = Computer::from(include_str!("input.txt"));
-    let mut a = 1;
-    for i in 1..16 {
-        loop {
-            computer.reset(a);
-            computer.run();
-            if computer.out[..] == computer.code[computer.out.len() - i]
-        }
-    }
-    */
 }
-
 
 #[derive(Debug)]
 struct Computer {
@@ -122,6 +117,7 @@ impl Computer {
             //    "{opcode},{operand} a:{:>8} b:{:>6} c:{:>6} ptr:{:>2} out:{:?}",
             //    self.a, self.b, self.c, self.ptr, self.out
             //);
+            //println!("{:?}", self);
             if opcode != 3 {
                 self.ptr += 2;
             }
@@ -166,23 +162,23 @@ impl Computer {
         self.out.clear();
     }
 
-    // 0
     fn adv(&mut self, operand: u64) {
+        // Opcode 0
         self.a /= 2_u64.pow(self.combo(operand) as u32);
     }
 
-    // 1
     fn bxl(&mut self, operand: u64) {
+        // Opcode 1
         self.b = self.b.bitxor(operand);
     }
 
-    // 2
     fn bst(&mut self, operand: u64) {
+        // Opcode 2
         self.b = self.combo(operand) % 8;
     }
 
-    // 3
     fn jnz(&mut self, operand: u64) {
+        // Opcode 3
         if self.a != 0 {
             self.ptr = operand;
         } else {
@@ -190,23 +186,23 @@ impl Computer {
         }
     }
 
-    // 4
     fn bxc(&mut self, _operand: u64) {
+        // Opcode 4
         self.b = self.b.bitxor(self.c);
     }
 
-    // 5
     fn out(&mut self, operand: u64) {
+        // Opcode 5
         self.out.push(self.combo(operand) % 8);
     }
 
-    // 6
     fn bdv(&mut self, operand: u64) {
+        // Opcode 6
         self.b = self.a / 2_u64.pow(self.combo(operand) as u32);
     }
 
-    // 7
     fn cdv(&mut self, operand: u64) {
+        // Opcode 7
         self.c = self.a / 2_u64.pow(self.combo(operand) as u32);
     }
 }
