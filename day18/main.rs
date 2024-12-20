@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+#![allow(dead_code)]
+use std::collections::{HashMap, HashSet};
 
 const X: usize = 71;
 const Y: usize = 71;
@@ -10,6 +11,159 @@ const BYTES: usize = 1024;
 //const BYTES: usize = 12;
 
 fn main() {
+    //println!("Part 1: {}", part1());
+    let part2 = part2();
+    println!("Part 2: {},{}", part2.0, part2.1);
+}
+
+fn part2() -> (usize, usize) {
+    let mut space = [[Location::Safe; Y]; X];
+    space[X - 1][Y - 1] = Location::End;
+    let bytes = include_str!("input.txt")
+        .lines()
+        .map(|line| line.split_once(',').unwrap())
+        .map(|(x, y)| (x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap()))
+        .collect::<Vec<_>>();
+
+    #[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
+    struct Coord {
+        x: usize,
+        y: usize,
+    }
+
+    fn leads_to_solution(
+        cell @ Coord { x, y }: Coord,
+        space: &[[Location; Y]; X],
+        visited: &mut HashSet<Coord>,
+    ) -> bool {
+        //println!("{cell:?}");
+        if space[x][y] == Location::End {
+            //println!("!!!!!!!!");
+            return true;
+        }
+
+        visited.insert(cell);
+
+        for neighbor in neighbors(cell, space) {
+            //println!("   check neighbor {neighbor:?}");
+            //println!("   visited: {visited:?}");
+            if !visited.contains(&neighbor) && leads_to_solution(neighbor, space, visited) {
+                //println!("  --!! {neighbor:?}");
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn neighbors(Coord { x, y }: Coord, space: &[[Location; X]; Y]) -> Vec<Coord> {
+        //println!("   neighbors: ({x}, {y})");
+        let mut result = Vec::new();
+        if x > 0 && [Location::Safe, Location::End].contains(&space[x - 1][y]) {
+            //println!("   W");
+            result.push(Coord { x: x - 1, y });
+        }
+        if y > 0 && [Location::Safe, Location::End].contains(&space[x][y - 1]) {
+            //println!("   N");
+            result.push(Coord { x, y: y - 1 });
+        }
+        if x < X - 1 && [Location::Safe, Location::End].contains(&space[x + 1][y]) {
+            //println!("   E");
+            result.push(Coord { x: x + 1, y });
+        }
+        if y < Y - 1 && [Location::Safe, Location::End].contains(&space[x][y + 1]) {
+            //println!("   S");
+            result.push(Coord { x, y: y + 1 });
+        }
+        result
+    }
+
+    for byte @ (x, y) in bytes {
+        println!("check byte: {byte:?}");
+        space[x][y] = Location::Corrupted;
+        let mut visited = HashSet::new();
+        if !leads_to_solution(Coord { x: 0, y: 0 }, &space, &mut visited) {
+            return byte;
+        }
+    }
+    unreachable!()
+
+    /*
+    println!("{bytes:?}");
+
+    'out: for byte @ (x, y) in bytes {
+        let to_check = vec![(0, 0)];
+        loop {
+            let mut new_to_check = Vec::new();
+            for location @ (x, y) in to_check.iter() {
+                match space[*x][*y] {
+                    Location::End => continue 'out,
+                    Location::Corrupted => {},
+                    Location::Safe => {
+                        if *x > 0 {
+                            new_to_check.push((x - 1, y));
+                        }
+                        if *y > 0 {
+                            new_to_check.push((x, y - 1));
+                        }
+                        if *x < X - 1 {
+                            new_to_check.push((x + 1, y));
+                        }
+                        if *y < Y - 1 {
+                            new_to_check.push((x, y + 1));
+                        }
+                        space[x][y] = Location::Corrupted;
+                    }
+                }
+            }
+        }
+    }
+    unreachable!()
+    */
+
+    /*
+    for byte @ (x, y) in bytes {
+        space[x][y] = Location::Corrupted;
+        if !solution_reached((0, 0), space) {
+            return byte;
+        }
+    }
+    unreachable!()
+    */
+}
+
+/*
+fn solution_reached((x, y): (usize, usize), mut space: [[Location; Y]; X]) -> bool {
+    println!("checking ({x}, {y})");
+    if space[x][y] == Location::End {
+        return true;
+    } else {
+        space[x][y] = Location::Corrupted;
+
+        if x > 0 && space[x - 1][y] == Location::Safe {
+            if solution_reached((x - 1, y), space) {
+                return true;
+            }
+        } else if y > 0 && space[x][y - 1] == Location::Safe {
+            if solution_reached((x, y - 1), space) {
+                return true;
+            }
+        } else if x < X - 1 && space[x + 1][y] == Location::Safe {
+            if solution_reached((x + 1, y), space) {
+                return true;
+            }
+        } else if y < Y - 1 && space[x][y + 1] == Location::Safe {
+            if solution_reached((x, y + 1), space) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+*/
+
+fn part1() -> usize {
     let mut space = [[Location::Safe; Y]; X];
     let bytes = include_str!("input.txt")
         //let bytes = include_str!("test.txt")
@@ -80,8 +234,7 @@ fn main() {
         let _ = std::fmt::write(&mut maze, format_args!("\n"));
     }
     println!("{maze}");
-    let part1 = solve_maze(&maze);
-    println!("Part 1: {}", part1);
+    solve_maze(&maze)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
