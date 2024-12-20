@@ -21,9 +21,11 @@ fn main() {
         space[bytes[i].0][bytes[i].1] = Location::Corrupted;
     }
 
-    // Fill in pockets of empty space which are useless to traverse.
+    /*
+    // Fill in pockets of empty space.
     fn is_empty_pocket(space: &[[Location; Y]; X], (x, y): (usize, usize)) -> bool {
         if x > 0 && y > 0 && x < X - 1 && y < Y - 1 {
+            #[allow(clippy::needless_range_loop)]
             for ix in x - 1..x + 2 {
                 for iy in y - 1..y + 2 {
                     if space[ix][iy] == Location::Corrupted {
@@ -36,6 +38,7 @@ fn main() {
         false
     }
     let mut space2 = space;
+    #[allow(clippy::needless_range_loop)]
     for x in 1..space.len() - 1 {
         for y in 1..space[0].len() - 1 {
             if is_empty_pocket(&space, (x, y)) {
@@ -44,6 +47,7 @@ fn main() {
         }
     }
     space = space2;
+    */
 
     // Convert to maze format from day 16.
     let mut space_as_maze = [[Location::Safe; Y + 2]; X + 2];
