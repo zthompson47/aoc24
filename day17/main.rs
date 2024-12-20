@@ -3,7 +3,7 @@ use std::{ops::BitXor, str::Lines};
 fn main() {
     let mut computer = Computer::from(include_str!("input.txt"));
     //computer.a = 528;
-    computer.a = 37222273957364;
+    //computer.a = 37222273957364;
     // 0 => 1
     // 1 => 0
     // 2 => 1
@@ -14,6 +14,24 @@ fn main() {
     // 7 => 6
     //println!("{computer:?}");
     println!("Part 1: {}", computer.run());
+
+    let mut a = 0;
+    for level in 1..=16 {
+        //println!("level:{level}");
+        a *= 8;
+        loop {
+            //println!("  a:{a}");
+            computer.reset(a);
+            computer.run();
+            //println!("  out:{:?}", computer.out);
+            if computer.code[16 - level..] == computer.out {
+                //println!("  FOUND a:{a}");
+                break;
+            }
+            a += 1;
+        }
+    }
+    println!("Part 2: {a}");
 
     //let mut i = 35184372088832;
 
@@ -88,22 +106,22 @@ struct Computer {
 
 impl Computer {
     fn run(&mut self) -> String {
-        println!("{:?}", self.code);
-        println!(
-            "_,_ a:{:>8} b:{:>6} c:{:>6} ptr:{:>2} out:{:?}",
-            self.a, self.b, self.c, self.ptr, self.out
-        );
+        //println!("{:?}", self.code);
+        //println!(
+        //    "_,_ a:{:>8} b:{:>6} c:{:>6} ptr:{:>2} out:{:?}",
+        //    self.a, self.b, self.c, self.ptr, self.out
+        //);
         while self.ptr < self.code.len() as u64 - 1 {
             let opcode = self.code[self.ptr as usize];
             let operand = self.code[self.ptr as usize + 1];
-            if self.ptr == 0 {
-                println!("_______________");
-            }
+            //if self.ptr == 0 {
+            //    println!("_______________");
+            //}
             self.execute(opcode, operand);
-            println!(
-                "{opcode},{operand} a:{:>8} b:{:>6} c:{:>6} ptr:{:>2} out:{:?}",
-                self.a, self.b, self.c, self.ptr, self.out
-            );
+            //println!(
+            //    "{opcode},{operand} a:{:>8} b:{:>6} c:{:>6} ptr:{:>2} out:{:?}",
+            //    self.a, self.b, self.c, self.ptr, self.out
+            //);
             if opcode != 3 {
                 self.ptr += 2;
             }
