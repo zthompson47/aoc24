@@ -1,0 +1,27 @@
+1    <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+2       <   A > A  v <<   AA >  ^ AA > A  v  AA ^ A   < v  AAA >  ^ A
+3           ^   A         <<      ^^   A     >>   A        vvv      A
+4               3                      7          9                 A
+
+1    v<<A^>>AvA^Av<<A^>>AAv<A<A^>>AA<Av>AA^Av<A^>AA<A>Av<A<A^>>AAA<Av>A^A
+2       <   A > A   <   AA  v <   AA ^  >> A  v  AA ^ A  v <   AAA ^  > A
+3           ^   A       ^^        <<       A     >>   A        vvv      A
+4               3                          7          9                 A
+
+
+
+1    <v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A
+1    v<<A^>>AvA^Av<<A^>>AAv<A<A^>>AA<Av>AA^Av<A^>AA<A>Av<A<A^>>AAA<Av>A^A
+2    <A>Av<<AA>^AA>AvAA^A<vAAA>^A
+2    <A>A<AAv<AA^>>AvAA^Av<AAA^>A
+3    ^A<<^^A>>AvvvA
+3    ^A^^<<A>>AvvvA
+4    379A
+4    379A
+
+(0, 0) (3, 2)
+(0, 2) (3, 0)
+(0, 3) (2, 0)
+
+(3, 2) (0, 0)
+(3, 0) (0, 2)
