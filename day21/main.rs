@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::collections::HashMap;
+
 fn main() {
     let mut numbers = Vec::new();
     let codes = include_str!("input.txt")
@@ -14,12 +16,21 @@ fn main() {
         })
         .collect::<Vec<_>>();
 
-    let part1: usize = codes
+    let part1 = run(&codes, &numbers, 2);
+    let part2 = run(&codes, &numbers, 25);
+
+    println!("Part 1: {part1}");
+    println!("Part 2: {part2}");
+}
+
+fn run(codes: &[Vec<(usize, usize)>], numbers: &[usize], levels: usize) -> usize {
+    let mut cache: Cache = Cache::default();
+    codes
         .iter()
         .zip(numbers)
         .map(|(code, number)| {
             println!(
-                "___________________________________________________\n{} {code:?}",
+                "__{}",
                 code.iter()
                     .map(|x| numeric_from_position(*x))
                     .collect::<String>()
@@ -27,32 +38,35 @@ fn main() {
             let mut from = position_from_numeric('A');
             code.iter()
                 .map(|to| {
-                    let result = shortest_numeric(from, *to);
+                    let result = shortest_numeric(from, *to, levels, &mut cache);
                     from = *to;
-                    //println!("[[ {} ]]", directionals_from_positions(result.clone()));
                     result
                 })
-                .map(|x| x.len())
+                //.map(|x| x.len())
                 .sum::<usize>()
                 * number
         })
-        .sum();
-
-    println!("Part 1: {part1}");
+        .sum()
 }
 
 /// Find shortest path between keys on numeric keyboard.  Assume corner paths will always
 /// be shorter than zig-zag through the center (?).
-fn shortest_numeric(from: (usize, usize), to: (usize, usize)) -> Vec<(usize, usize)> {
+fn shortest_numeric(
+    from: (usize, usize),
+    to: (usize, usize),
+    levels: usize,
+    cache: &mut Cache,
+) -> usize {
     println!(
-        "* shortest_numeric from:{from:?} to:{to:?}, {} to {}",
+        "{} to {}",
         numeric_from_position(from),
         numeric_from_position(to)
     );
     let mut paths = Vec::new();
     if from == to {
         // Same button, press it again.
-        return vec![position_from_directional('A')];
+        //return vec![position_from_directional('A')];
+        return 1;
     } else if from.0 != to.0 && from.1 != to.1 {
         // Path has a corner.
         let corners = [(from.0, to.1), (to.0, from.1)];
@@ -72,11 +86,10 @@ fn shortest_numeric(from: (usize, usize), to: (usize, usize)) -> Vec<(usize, usi
         paths.push(path);
     }
 
-    let mut result = Vec::new();
+    let mut result = 0;
     for path in paths {
-        let shortest_directional = shortest_directional(path, 2);
-        //let shortest_directional = path;
-        if result.is_empty() || shortest_directional.len() < result.len() {
+        let shortest_directional = shortest_directional(path, levels, cache);
+        if result == 0 || shortest_directional < result {
             result = shortest_directional;
         }
     }
@@ -84,26 +97,43 @@ fn shortest_numeric(from: (usize, usize), to: (usize, usize)) -> Vec<(usize, usi
     result
 }
 
-fn shortest_directional(path: Vec<(usize, usize)>, level: usize) -> Vec<(usize, usize)> {
+type Cache = HashMap<CacheKey, usize>;
+
+#[derive(Default, Hash, Eq, PartialEq)]
+struct CacheKey {
+    level: usize,
+    path: Vec<(usize, usize)>,
+}
+
+fn shortest_directional(path: Vec<(usize, usize)>, level: usize, cache: &mut Cache) -> usize {
     if level == 0 {
-        println!("0000000000000000");
-        return path;
+        //println!("0000000000000000");
+        return path.len();
     }
 
-    let mut result = Vec::new();
+    if let Some(count) = cache.get(&CacheKey {
+        level,
+        path: path.clone(),
+    }) {
+        return *count;
+    }
+
+    let mut result = 0;
 
     let mut from = position_from_directional('A');
-    for to in path {
+    for to in &path {
         let mut result_paths = Vec::new();
 
+        /*
         println!(
             "    {level:width$} shortest_directional from:{from:?} to:{to:?}, {} to {}",
             directional_from_position(from),
-            directional_from_position(to),
+            directional_from_position(*to),
             width = level
         );
+        */
 
-        if from == to {
+        if from == *to {
             result_paths.push(vec![position_from_directional('A')]);
         } else if from.0 != to.0 && from.1 != to.1 {
             let corners = [(from.0, to.1), (to.0, from.1)];
@@ -111,31 +141,40 @@ fn shortest_directional(path: Vec<(usize, usize)>, level: usize) -> Vec<(usize, 
                 if corner != (0, 0) {
                     let mut path = Vec::new();
                     path.append(&mut straight_directional_line(from, corner));
-                    path.append(&mut straight_directional_line(corner, to));
+                    path.append(&mut straight_directional_line(corner, *to));
                     path.push(position_from_directional('A'));
                     result_paths.push(path);
                 }
             }
         } else {
-            let mut path = straight_directional_line(from, to);
+            let mut path = straight_directional_line(from, *to);
             path.push(position_from_directional('A'));
             result_paths.push(path);
         }
-        from = to;
+        from = *to;
 
-        result_paths = result_paths
+        let result_paths_lens: Vec<usize> = result_paths
             .into_iter()
-            .map(|x| shortest_directional(x, level - 1))
+            .map(|x| shortest_directional(x, level - 1, cache))
             .collect();
 
-        let mut smallest = Vec::new();
-        for path in result_paths {
-            if smallest.is_empty() || path.len() < smallest.len() {
-                smallest = path;
+        let mut smallest = 0;
+        for count in result_paths_lens {
+            if smallest == 0 || count < smallest {
+                smallest = count;
             }
         }
-        result.append(&mut smallest);
+        result += smallest;
+        //result.append(&mut smallest);
     }
+
+    cache.insert(
+        CacheKey {
+            level,
+            path: path.clone(),
+        },
+        result,
+    );
 
     result
 }
