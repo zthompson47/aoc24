@@ -29,12 +29,14 @@ fn run(codes: &[Vec<(usize, usize)>], numbers: &[usize], levels: usize) -> usize
         .iter()
         .zip(numbers)
         .map(|(code, number)| {
+            /*
             println!(
                 "__{}",
                 code.iter()
                     .map(|x| numeric_from_position(*x))
                     .collect::<String>()
             );
+            */
             let mut from = position_from_numeric('A');
             code.iter()
                 .map(|to| {
@@ -57,11 +59,13 @@ fn shortest_numeric(
     levels: usize,
     cache: &mut Cache,
 ) -> usize {
+    /*
     println!(
         "{} to {}",
         numeric_from_position(from),
         numeric_from_position(to)
     );
+    */
     let mut paths = Vec::new();
     if from == to {
         // Same button, press it again.
@@ -107,7 +111,6 @@ struct CacheKey {
 
 fn shortest_directional(path: Vec<(usize, usize)>, level: usize, cache: &mut Cache) -> usize {
     if level == 0 {
-        //println!("0000000000000000");
         return path.len();
     }
 
@@ -123,7 +126,6 @@ fn shortest_directional(path: Vec<(usize, usize)>, level: usize, cache: &mut Cac
     let mut from = position_from_directional('A');
     for to in &path {
         let mut result_paths = Vec::new();
-
         /*
         println!(
             "    {level:width$} shortest_directional from:{from:?} to:{to:?}, {} to {}",
@@ -132,7 +134,6 @@ fn shortest_directional(path: Vec<(usize, usize)>, level: usize, cache: &mut Cac
             width = level
         );
         */
-
         if from == *to {
             result_paths.push(vec![position_from_directional('A')]);
         } else if from.0 != to.0 && from.1 != to.1 {
