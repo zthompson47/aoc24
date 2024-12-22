@@ -13,14 +13,16 @@ fn main() {
         })
         .collect::<Vec<_>>();
 
-    for code in codes.iter() {
-        println!("{code:?}");
-    }
-
     let part1: usize = codes
         .iter()
         .zip(numbers)
         .map(|(code, number)| {
+            println!(
+                "___________________________________________________\n{} {code:?}",
+                code.iter()
+                    .map(|x| numeric_from_position(*x))
+                    .collect::<String>()
+            );
             let mut from = position_from_numeric('A');
             code.iter()
                 .map(|to| {
@@ -34,50 +36,52 @@ fn main() {
         })
         .sum();
 
-    /*
-    let part1: usize = codes
-        .iter()
-        .zip(numbers)
-        .map(|(code, number)| {
-            let mut steps = directions(directions(directions(code.to_vec())));
-            steps.remove(0);
-            steps.len() * number
-        })
-        .sum();
-    */
-
-    //println!("Part 1: {part1}");
+    println!("Part 1: {part1}");
 }
 
 /// Find shortest path between keys on numeric keyboard.  Assume corner paths will always
 /// be shorter than zig-zag through the center (?).
 fn shortest_numeric(from: (usize, usize), to: (usize, usize)) -> Vec<(usize, usize)> {
+    println!(
+        "shortest_numeric from:{from:?} to:{to:?}, {} to {}",
+        numeric_from_position(from),
+        numeric_from_position(to)
+    );
     let mut paths = Vec::new();
     if from == to {
-        return Vec::new();
+        // Same button, press it again.
+        return vec![position_from_numeric('A')];
     } else if from.0 != to.0 && from.1 != to.1 {
+        // Path has a corner.
         let corners = [(from.0, to.1), (to.0, from.1)];
-        println!("CORNER: from:{from:?} to:{to:?} corners:{corners:?}");
+        println!("  corners:{corners:?}");
         for corner in corners {
-            let mut path = Vec::new();
             if corner != (3, 0) {
+                let mut path = Vec::new();
                 path.append(&mut straight_directional_line(from, corner));
                 path.append(&mut straight_directional_line(corner, to));
+                println!("    corner path:{path:?}");
+                paths.push(path);
             }
-            println!(" corner path:{path:?}");
         }
     } else {
-        println!("STRAIGHT: from:{from:?} to:{to:?}");
-        paths = straight_directional_line(from, to);
+        // Straight path.
+        println!("  straight");
+        paths.push(straight_directional_line(from, to));
     }
-    println!("    RESULT:{paths:?}");
+    println!(
+        "    PATHS:{:?}",
+        paths
+            .iter()
+            .map(|x| directionals_from_positions((*x).clone()))
+            .collect::<Vec<_>>()
+    );
 
     Vec::new()
 }
 
 fn straight_directional_line(from: (usize, usize), to: (usize, usize)) -> Vec<(usize, usize)> {
     assert!(from.0 == to.0 || from.1 == to.1);
-    //println!("    line: from:{from:?} to:{to:?}");
     let mut result = Vec::new();
     if from.0 != to.0 {
         for _ in 0..from.0.abs_diff(to.0) {
@@ -100,32 +104,6 @@ fn straight_directional_line(from: (usize, usize), to: (usize, usize)) -> Vec<(u
     }
     result
 }
-
-/*
-fn directions(mut positions: Vec<(usize, usize)>) -> Vec<(usize, usize)> {
-    let mut result = vec![position_from_directional('A')];
-    let mut from = positions.remove(0);
-    for to in positions {
-        for _ in 0..from.0.abs_diff(to.0) {
-            result.push(position_from_directional(if from.0 < to.0 {
-                'v'
-            } else {
-                '^'
-            }));
-        }
-        for _ in 0..from.1.abs_diff(to.1) {
-            result.push(position_from_directional(if from.1 < to.1 {
-                '>'
-            } else {
-                '<'
-            }));
-        }
-        result.push(position_from_directional('A'));
-        from = to;
-    }
-    result
-}
-*/
 
 fn position_from_numeric(key: char) -> (usize, usize) {
     match key {
@@ -155,7 +133,25 @@ fn position_from_directional(key: char) -> (usize, usize) {
     }
 }
 
-fn directions_from_positions(positions: Vec<(usize, usize)>) -> String {
+fn numeric_from_position(position: (usize, usize)) -> char {
+    match position {
+        (0, 0) => '7',
+        (0, 1) => '8',
+        (0, 2) => '9',
+        (1, 0) => '4',
+        (1, 1) => '5',
+        (1, 2) => '6',
+        (2, 0) => '1',
+        (2, 1) => '2',
+        (2, 2) => '3',
+        (3, 1) => '0',
+        (3, 2) => 'A',
+        _ => unreachable!(),
+    }
+}
+
+#[allow(dead_code)]
+fn directionals_from_positions(positions: Vec<(usize, usize)>) -> String {
     let mut result = String::new();
     for p in positions {
         result.push(match p {
