@@ -19,7 +19,7 @@ fn main() {
     let part1: isize = buyers.iter().map(|secrets| secrets.last().unwrap()).sum();
     println!("Part 1: {part1}");
 
-    let prices: Vec<Vec<(isize, isize)>> = buyers
+    let prices: Vec<Vec<(Price, Diff)>> = buyers
         .iter()
         .map(|secrets| {
             secrets
@@ -32,10 +32,10 @@ fn main() {
 
     //println!("{prices:#?}");
 
-    let predictions: Vec<HashMap<Sequence, isize>> = prices
+    let predictions: Vec<HashMap<Sequence, Price>> = prices
         .iter()
         .map(|price_list| {
-            let mut sequence = VecDeque::<isize>::new();
+            let mut sequence = VecDeque::<Diff>::new();
             price_list
                 .iter()
                 .fold(HashMap::new(), |mut acc, (price, diff)| {
@@ -54,9 +54,10 @@ fn main() {
 
     //println!("{predictions:?}");
 
-    let mut master_price_list: HashMap<Sequence, isize> = HashMap::new();
+    let mut master_price_list: HashMap<Sequence, Price> = HashMap::new();
 
     for prediction_list in predictions {
+        // Use with test0.txt..
         //if let Some(price) = prediction_list.get(&Sequence((-2, 1, -1, 3))) {
         //    println!("yeah: {price}");
         //}
@@ -73,20 +74,10 @@ fn main() {
     let part2 = master_price_list.values().max().unwrap();
 
     println!("Part 2: {part2}");
-
-    /*
-    let sequences: HashMap<Sequence, isize> = secrets
-        .iter()
-        .zip(secrets.iter().skip(1))
-        .fold((VecDeque::<isize>::new(), 0), |deque, (prior, next)| {
-            let diff = next - prior;
-            deque.0.push_back(diff);
-            Some(deque.clone())
-        })
-        .skip(4)
-        .fold(HashMap::new(), |acc, deque| todo!());
-        */
 }
+
+type Price = isize;
+type Diff = isize;
 
 #[derive(Hash, Eq, PartialEq, Debug)]
 struct Sequence((isize, isize, isize, isize));
