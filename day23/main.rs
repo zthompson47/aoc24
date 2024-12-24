@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::collections::{HashMap, HashSet};
 
 type Network<'a> = HashMap<&'a str, Vec<&'a str>>;
@@ -27,11 +26,6 @@ fn main() {
                     .or_insert(vec![left]);
                 network
             });
-    //println!("{network:?}");
-    //println!("network count: {}", network.keys().len());
-    //for v in network.values() {
-    //    println!("{}", v.len());
-    //}
 
     let triplets: HashSet<Triplet> =
         network
@@ -44,31 +38,9 @@ fn main() {
                 }
                 triplets
             });
-    //println!("{triplets:?}");
-    let mut triplets = triplets.into_iter().collect::<Vec<_>>();
-    triplets.sort_by(|a, b| a.0.cmp(b.0));
-    //for t in triplets.iter() {
-    //    println!("{t:?}");
-    //}
-    //println!("triplet count: {}", triplets.len());
 
     let part1 = triplets.iter().filter(|x| x.has_t()).count();
     println!("Part 1: {part1}");
-
-    /*
-    let mut max = Vec::new();
-    for triplet in triplets.into_iter() {
-        let group = triplet.max_network(&network);
-        //println!("len: {} {group:?}", group.len());
-        if group.len() > max.len() {
-            max = group;
-        }
-    }
-    //println!("{} {max:?}", max.len());
-    max.sort();
-    let part2 = max.join(",");
-    println!("Part 2: {part2}");
-    */
 
     let mut max = network
         .keys()
@@ -77,12 +49,6 @@ fn main() {
         .unwrap();
     max.sort();
     println!("Part 2: {}", max.join(","));
-
-    /*
-    let mut l = largest_network("bo", &network);
-    l.sort();
-    println!("?? {l:?}");
-    */
 }
 
 fn largest_network<'a>(host: &'a str, network: &'a Network) -> Vec<&'a str> {
@@ -100,32 +66,6 @@ fn largest_network<'a>(host: &'a str, network: &'a Network) -> Vec<&'a str> {
 }
 
 #[derive(Hash, Eq, PartialEq, Debug)]
-struct Cache(String, Vec<String>);
-
-fn is_connected(
-    host: &str,
-    group: &[&str],
-    network: &HashMap<&str, Vec<&str>>,
-    cache: &mut HashMap<Cache, bool>,
-) -> bool {
-    let mut new_group = Vec::new();
-    for g in group {
-        new_group.push(g.to_string());
-    }
-    if let Some(result) = cache.get(&Cache(host.to_string(), new_group.clone())) {
-        return *result;
-    }
-    let host_group = network.get(host).unwrap();
-    for peer in group.iter() {
-        if !host_group.contains(peer) {
-            cache.insert(Cache(host.to_string(), new_group), false);
-            return false;
-        }
-    }
-    true
-}
-
-#[derive(Hash, Eq, PartialEq, Debug)]
 struct Triplet<'a>(&'a str, &'a str, &'a str);
 
 impl<'a> Triplet<'a> {
@@ -137,58 +77,6 @@ impl<'a> Triplet<'a> {
 
     fn has_t(&self) -> bool {
         self.0.starts_with('t') || self.1.starts_with('t') || self.2.starts_with('t')
-    }
-
-    fn max_network(self, network: &'a HashMap<&'a str, Vec<&'a str>>) -> Vec<&'a str> {
-        let mut result = HashSet::from([self.0, self.1, self.2]);
-        let peers0 = network.get(self.0).unwrap();
-        let peers1 = network.get(self.1).unwrap();
-        let peers2 = network.get(self.2).unwrap();
-        for peer in peers0 {
-            if peers1.contains(peer) && peers2.contains(peer) {
-                let mut good = true;
-                for h in &result {
-                    let p = network.get(peer).unwrap();
-                    if !p.contains(h) {
-                        good = false;
-                    }
-                }
-                if good {
-                    result.insert(peer);
-                }
-            }
-        }
-        for peer in peers1 {
-            if peers0.contains(peer) && peers2.contains(peer) {
-                let mut good = true;
-                for h in &result {
-                    let p = network.get(peer).unwrap();
-                    if !p.contains(h) {
-                        good = false;
-                    }
-                }
-                if good {
-                    result.insert(peer);
-                }
-            }
-        }
-        for peer in peers2 {
-            if peers0.contains(peer) && peers1.contains(peer) {
-                let mut good = true;
-                for h in &result {
-                    let p = network.get(peer).unwrap();
-                    if !p.contains(h) {
-                        good = false;
-                    }
-                }
-                if good {
-                    result.insert(peer);
-                }
-            }
-        }
-        let mut result = result.iter().copied().collect::<Vec<_>>();
-        result.sort();
-        result
     }
 }
 
