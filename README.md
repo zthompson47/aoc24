@@ -11,3 +11,6 @@ xor stuff does.
 **Day 18**
 Takes a long time but got the answer.  Should be a lot faster (?) but
 didn't figure out how to optimize the large blocks of empty space.
+
+** Day 23**
+Ugly code..

@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::collections::{HashMap, HashSet};
 
 fn main() {
@@ -24,7 +25,7 @@ fn main() {
                     .or_insert(vec![left]);
                 network
             });
-    println!("{network:?}");
+    //println!("{network:?}");
     //println!("network count: {}", network.keys().len());
     //for v in network.values() {
     //    println!("{}", v.len());
@@ -41,7 +42,7 @@ fn main() {
                 }
                 triplets
             });
-    println!("{triplets:?}");
+    //println!("{triplets:?}");
     let mut triplets = triplets.into_iter().collect::<Vec<_>>();
     triplets.sort_by(|a, b| a.0.cmp(b.0));
     //for t in triplets.iter() {
