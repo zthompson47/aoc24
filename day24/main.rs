@@ -41,28 +41,20 @@ fn main() {
             .and_modify(|x| x.to_gates.push(i));
     }
 
-    //println!("{device:?}");
-
-    let mut i = 0;
-    #[allow(clippy::never_loop)]
     while !device.is_done() {
-        println!("{:?}", device);
         let wires_todo = device
             .wires
             .iter()
-            .filter(|(name, wire)| !wire.completed && wire.value.is_some())
+            .filter(|(_, wire)| !wire.completed && wire.value.is_some())
             .map(|(name, _)| name.clone())
             .collect::<Vec<_>>();
         for name in wires_todo {
-            println!("wire: {name}");
             let wire = device.wires.get_mut(&name).unwrap();
             for gate_idx in wire.to_gates.clone() {
                 device.gates[gate_idx].set_operand(name.clone(), wire.value.unwrap());
                 wire.completed = true;
             }
         }
-        println!("{:?}", device);
-
         let gates_todo = device
             .gates
             .iter()
@@ -73,7 +65,6 @@ fn main() {
             .map(|(i, _)| i)
             .collect::<Vec<_>>();
         for gate_idx in gates_todo {
-            println!("gate: {gate_idx}");
             let gate = &mut device.gates[gate_idx];
             let result = gate
                 .operation
@@ -81,13 +72,6 @@ fn main() {
             device.wires.get_mut(&gate.to_wire).unwrap().value = Some(result);
             gate.completed = true;
         }
-        println!("{:?}", device);
-
-        println!("___________________________________");
-        if i == 1 {
-            //break;
-        }
-        i += 1;
     }
 
     let mut z = device
@@ -134,7 +118,6 @@ impl Device {
         self.wires
             .iter()
             .filter(|(name, wire)| {
-                //println!("wtf {name} {wire:?}");
                 name.starts_with('z') && wire.value.is_none()
             })
             .collect::<Vec<_>>()
@@ -164,10 +147,6 @@ impl Gate {
         if self.right == name {
             self.right_value = Some(value);
         }
-        //if let (Some(left), Some(right)) = (self.left_value, self.right_value) {
-        //    return Some(self.operation.perform(left, right));
-        //}
-        //None
     }
 }
 
@@ -198,21 +177,3 @@ impl From<&str> for Operation {
         }
     }
 }
-
-/*
-let mut completed_wires: HashSet<&str> = HashSet::new();
-while !device.is_done() {
-    let mut inner_completed_wires = completed_wires.clone();
-    for name in inner_completed_wires.iter().filter(|x| {
-        device.wires.get(**x).unwrap().value.is_some() && !inner_completed_wires.contains(**x)
-    }) {
-        let wire = device.wires.get(name).unwrap();
-        for gate in wire.to_gates.iter() {
-            if let Some(result) = device.gates[*gate].set_value(name, wire.value.unwrap()) {
-                device.wires.get_mut(name).unwrap().value = Some(result);
-                completed_wires.insert(name);
-            }
-        }
-    }
-}
-*/
