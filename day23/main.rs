@@ -8,15 +8,23 @@ fn main() {
                 let (left, right) = connection.split_once('-').unwrap();
                 network
                     .entry(left)
-                    .and_modify(|x| x.push(right))
+                    .and_modify(|x| {
+                        //if !x.contains(&right) {
+                        x.push(right)
+                        //}
+                    })
                     .or_insert(vec![right]);
                 network
                     .entry(right)
-                    .and_modify(|x| x.push(left))
+                    .and_modify(|x| {
+                        //if !x.contains(&left) {
+                        x.push(left)
+                        //}
+                    })
                     .or_insert(vec![left]);
                 network
             });
-    //println!("{network:?}");
+    println!("{network:?}");
     //println!("network count: {}", network.keys().len());
     //for v in network.values() {
     //    println!("{}", v.len());
@@ -33,7 +41,7 @@ fn main() {
                 }
                 triplets
             });
-    //println!("{triplets:?}");
+    println!("{triplets:?}");
     let mut triplets = triplets.into_iter().collect::<Vec<_>>();
     triplets.sort_by(|a, b| a.0.cmp(b.0));
     //for t in triplets.iter() {
@@ -47,7 +55,7 @@ fn main() {
     let mut max = Vec::new();
     for triplet in triplets.into_iter() {
         let group = triplet.max_network(&network);
-        println!("len: {}", group.len());
+        //println!("len: {} {group:?}", group.len());
         if group.len() > max.len() {
             max = group;
         }
@@ -56,78 +64,6 @@ fn main() {
     max.sort();
     let part2 = max.join(",");
     println!("Part 2: {part2}");
-
-    /*
-    let groups = triplets
-        .iter()
-        .map(|x| vec![x.0, x.1, x.2])
-        .collect::<Vec<_>>();
-
-    fn grow_network<'a>(
-        groups: &'a [Vec<&'a str>],
-        network: &'a HashMap<&'a str, Vec<&'a str>>,
-        cache: &mut HashMap<Cache, bool>,
-    ) -> Vec<Vec<&'a str>> {
-        let mut result = Vec::new();
-        for group in groups {
-            for host in network.keys() {
-                if is_connected(host, group, network, cache) {
-                    let mut new_group = group.clone();
-                    new_group.push(host);
-                    new_group.sort();
-                    if !result.contains(&new_group) {
-                        //println!("got one: {new_group:?}");
-                        result.push(new_group);
-                    }
-                }
-            }
-        }
-        result
-    }
-
-    let mut cache = HashMap::new();
-    let new_groups = grow_network(&groups, &network, &mut cache);
-    for g in new_groups {
-        println!("NEWGROUP {g:?}");
-    }
-    */
-
-    /*
-    for group in groups {
-        for host in network.keys() {
-            if is_connected(host, &group, &network) {
-                println!("gotone {host} {group:?}");
-            }
-        }
-    }
-    */
-
-    /*
-    let mut old_groups = groups.iter().fold(Vec::new(), |mut acc, group| {
-        acc.push(group.to_vec());
-        acc
-    });
-    let mut new_groups: Vec<Vec<&str>> = Vec::new();
-    for i in 0..old_groups.len() {
-        let group = &old_groups[i];
-        for host in network.keys() {
-            if is_connected(host, group, &network) {
-                let mut new_group = group.clone();
-                new_group.push(host);
-                new_group.sort();
-                //println!("new_group: {:?}", &new_group);
-                new_groups.push(new_group);
-            }
-        }
-        if new_groups.is_empty() {
-            break;
-        }
-        old_groups = new_groups.clone();
-    }
-    for group in old_groups {
-        println!("{group:?}");
-    }
-    */
 }
 
 #[derive(Hash, Eq, PartialEq, Debug)]
@@ -171,24 +107,50 @@ impl<'a> Triplet<'a> {
     }
 
     fn max_network(self, network: &'a HashMap<&'a str, Vec<&'a str>>) -> Vec<&'a str> {
-        let seed = [self.0, self.1, self.2];
-        let mut result = HashSet::from(seed);
-        let peers0 = network.get(seed[0]).unwrap();
-        let peers1 = network.get(seed[1]).unwrap();
-        let peers2 = network.get(seed[2]).unwrap();
+        let mut result = HashSet::from([self.0, self.1, self.2]);
+        let peers0 = network.get(self.0).unwrap();
+        let peers1 = network.get(self.1).unwrap();
+        let peers2 = network.get(self.2).unwrap();
         for peer in peers0 {
             if peers1.contains(peer) && peers2.contains(peer) {
-                result.insert(peer);
+                let mut good = true;
+                for h in &result {
+                    let p = network.get(peer).unwrap();
+                    if !p.contains(h) {
+                        good = false;
+                    }
+                }
+                if good {
+                    result.insert(peer);
+                }
             }
         }
         for peer in peers1 {
             if peers0.contains(peer) && peers2.contains(peer) {
-                result.insert(peer);
+                let mut good = true;
+                for h in &result {
+                    let p = network.get(peer).unwrap();
+                    if !p.contains(h) {
+                        good = false;
+                    }
+                }
+                if good {
+                    result.insert(peer);
+                }
             }
         }
         for peer in peers2 {
             if peers0.contains(peer) && peers1.contains(peer) {
-                result.insert(peer);
+                let mut good = true;
+                for h in &result {
+                    let p = network.get(peer).unwrap();
+                    if !p.contains(h) {
+                        good = false;
+                    }
+                }
+                if good {
+                    result.insert(peer);
+                }
             }
         }
         let mut result = result.iter().copied().collect::<Vec<_>>();
