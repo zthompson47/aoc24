@@ -1,8 +1,10 @@
 #![allow(dead_code)]
 use std::collections::{HashMap, HashSet};
 
+type Network<'a> = HashMap<&'a str, Vec<&'a str>>;
+
 fn main() {
-    let network: HashMap<&str, Vec<&str>> =
+    let network: Network =
         include_str!("input.txt")
             .lines()
             .fold(HashMap::new(), |mut network, connection| {
@@ -10,17 +12,17 @@ fn main() {
                 network
                     .entry(left)
                     .and_modify(|x| {
-                        //if !x.contains(&right) {
-                        x.push(right)
-                        //}
+                        if !x.contains(&right) {
+                            x.push(right)
+                        }
                     })
                     .or_insert(vec![right]);
                 network
                     .entry(right)
                     .and_modify(|x| {
-                        //if !x.contains(&left) {
-                        x.push(left)
-                        //}
+                        if !x.contains(&left) {
+                            x.push(left)
+                        }
                     })
                     .or_insert(vec![left]);
                 network
@@ -53,6 +55,7 @@ fn main() {
     let part1 = triplets.iter().filter(|x| x.has_t()).count();
     println!("Part 1: {part1}");
 
+    /*
     let mut max = Vec::new();
     for triplet in triplets.into_iter() {
         let group = triplet.max_network(&network);
@@ -65,6 +68,35 @@ fn main() {
     max.sort();
     let part2 = max.join(",");
     println!("Part 2: {part2}");
+    */
+
+    let mut max = network
+        .keys()
+        .map(|host| largest_network(host, &network))
+        .max_by(|a, b| a.len().cmp(&b.len()))
+        .unwrap();
+    max.sort();
+    println!("Part 2: {}", max.join(","));
+
+    /*
+    let mut l = largest_network("bo", &network);
+    l.sort();
+    println!("?? {l:?}");
+    */
+}
+
+fn largest_network<'a>(host: &'a str, network: &'a Network) -> Vec<&'a str> {
+    let mut result = vec![host];
+    'out: for peer in network.get(host).unwrap() {
+        let peer_network = network.get(peer).unwrap();
+        for host in &result {
+            if !peer_network.contains(host) {
+                continue 'out;
+            }
+        }
+        result.push(peer);
+    }
+    result
 }
 
 #[derive(Hash, Eq, PartialEq, Debug)]
