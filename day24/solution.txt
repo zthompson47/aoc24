@@ -1,0 +1,12 @@
+ckb,ksv,nbd,pjk,tqq,z06,z20,z39
+
+"ckb"
+"ksv"
+"nbd"
+"pjk"
+"tqq"
+"z06"
+"z20"
+"z39"
+
+WORKS!!! ckb,kbs,ksv,nbd,tqq,z06,z20,z39
